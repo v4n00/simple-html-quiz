@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Multiple Choice Quiz</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				background-color: #222;
+				color: #fff;
+			}
+			h1 {
+				text-align: center;
+				color: #4fc3f7;
+				cursor: pointer;
+			}
+			form {
+				width: 100%;
+				max-width: 600px;
+				background-color: #333;
+				padding: 20px;
+				border-radius: 10px;
+				box-shadow: 0 0 10px #00000080;
+				position: relative;
+			}
+			fieldset {
+				border: none;
+				padding: 0;
+				margin-bottom: 20px;
+			}
+			legend {
+				font-size: 1.2em;
+				margin-bottom: 10px;
+				color: #2196f3;
+			}
+			label {
+				display: block;
+				margin-bottom: 10px;
+			}
+			.correct {
+				color: #4caf50;
+			}
+			.incorrect {
+				color: #f44336;
+			}
+			.buttons {
+				display: flex;
+				gap: 10px;
+				justify-content: space-between;
+			}
+			button {
+				width: 100%;
+				padding: 10px;
+				font-size: 1em;
+				border: none;
+				border-radius: 5px;
+				cursor: pointer;
+				color: white;
+			}
+			button.reset {
+				background-color: #f44336;
+			}
+			button.submit {
+				background-color: #4caf50;
+			}
+		</style>
+	</head>
+	<body>
+		<h1 onclick="about()">Multiple Choice Quiz</h1>
+		<form id="quizForm">
+			<div class="buttons">
+				<button class="submit" type="button" onclick="submitQuiz()">Submit</button>
+				<button class="reset" type="button" onclick="location.reload()">Reset Quiz</button>
+			</div>
+		</form>
+
+		<script>
+			const questions = [
+				{
+					text: 'What is the capital of France?',
+					answers: ['Paris', 'London', 'Rome', 'Berlin'],
+					correct: ['Paris'],
+				},
+				{
+					text: 'What is 2 + 2?',
+					answers: ['1', '3', '5', '4'],
+					correct: ['4'],
+					image: 'images/2plus2.png',
+				},
+				{
+					text: 'Which are the largest oceans on Earth?',
+					answers: ['Atlantic', 'Indian', 'Arctic', 'Pacific'],
+					correct: ['Atlantic', 'Pacific'],
+				},
+			];
+
+			const shuffle = (array) => {
+				for (let i = array.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[array[i], array[j]] = [array[j], array[i]];
+				}
+				return array;
+			};
+
+			shuffle(questions);
+			questions.forEach((question) => shuffle(question.answers));
+
+			const form = document.getElementById('quizForm');
+
+			const generateForm = () => {
+				questions.forEach((question, index) => {
+					const fieldset = document.createElement('fieldset');
+					const legend = document.createElement('legend');
+					legend.textContent = question.text;
+					fieldset.appendChild(legend);
+
+					if (question.image) {
+						const img = document.createElement('img');
+						img.src = question.image;
+						img.alt = "If the image here doesn't render, please make sure there is an images folder that contains the images referenced in the questions.";
+						img.style.maxWidth = '100%';
+						img.style.marginBottom = '10px';
+						fieldset.appendChild(img);
+					}
+
+					const inputType = question.correct.length === 1 ? 'radio' : 'checkbox';
+
+					question.answers.forEach((answer) => {
+						const label = document.createElement('label');
+						const input = document.createElement('input');
+						input.type = inputType;
+						input.name = 'question' + index;
+						input.value = answer;
+						label.appendChild(input);
+						label.appendChild(document.createTextNode(answer));
+						fieldset.appendChild(label);
+						fieldset.appendChild(document.createElement('br'));
+					});
+
+					form.insertBefore(fieldset, document.querySelector('.buttons'));
+				});
+			};
+
+			generateForm();
+
+			const submitQuiz = () => {
+				let correctAnswers = 0;
+				questions.forEach((question, index) => {
+					const selected = document.querySelectorAll(`input[name="question${index}"]:checked`);
+					const fieldset = document.querySelectorAll('fieldset')[index];
+					let selectedValues = Array.from(selected).map((input) => input.value);
+					let correctCount = question.correct.length;
+
+					let allCorrect = question.correct.every((answer) => selectedValues.includes(answer)) && selectedValues.length === correctCount;
+
+					const labels = fieldset.querySelectorAll('label');
+					labels.forEach((label) => {
+						const input = label.querySelector('input');
+						if (question.correct.includes(input.value)) {
+							label.classList.add('correct');
+							label.innerHTML += ' ✔';
+						} else if (input.checked) {
+							label.classList.add('incorrect');
+							label.innerHTML += ' ✘';
+						}
+					});
+
+					if (allCorrect) {
+						correctAnswers++;
+					}
+				});
+				alert('You got ' + correctAnswers + ' out of ' + questions.length + ' correct.');
+			};
+
+			const about = () => {
+				alert('All purpose form created by tudor ᗜˬᗜ');
+			};
+		</script>
+	</body>
+</html>
